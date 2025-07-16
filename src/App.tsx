@@ -2,7 +2,7 @@ import React from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Header from './components/Layout/Header';
-import LoginForm from './components/Auth/LoginForm';
+import AuthContainer from './components/Auth/AuthContainer';
 import AdminDashboard from './components/Dashboard/AdminDashboard';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import CourseRegistration from './components/Courses/CourseRegistration';
@@ -13,7 +13,7 @@ const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = React.useState<'dashboard' | 'courses' | 'contact'>('dashboard');
 
   if (!user) {
-    return <LoginForm />;
+    return <AuthContainer />;
   }
 
   const Navigation = () => (

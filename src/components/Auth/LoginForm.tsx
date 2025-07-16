@@ -3,7 +3,11 @@ import { User, Lock, LogIn, BookOpen } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  onSwitchToSignUp: () => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +24,9 @@ const LoginForm: React.FC = () => {
       loginError: 'Invalid email or password',
       demoCredentials: 'Demo Credentials:',
       adminLogin: 'Admin: admin@language.com / admin123',
-      studentLogin: 'Student: student@language.com / student123'
+      studentLogin: 'Student: student@language.com / student123',
+      noAccount: 'Don\'t have an account?',
+      signUpHere: 'Sign up here'
     },
     ar: {
       title: 'مرحباً بعودتك',
@@ -31,7 +37,9 @@ const LoginForm: React.FC = () => {
       loginError: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       demoCredentials: 'بيانات تجريبية:',
       adminLogin: 'مدير: admin@language.com / admin123',
-      studentLogin: 'طالب: student@language.com / student123'
+      studentLogin: 'طالب: student@language.com / student123',
+      noAccount: 'ليس لديك حساب؟',
+      signUpHere: 'سجل هنا'
     }
   };
 
@@ -130,6 +138,19 @@ const LoginForm: React.FC = () => {
             <p className="text-sm font-medium text-blue-800 mb-2">{t.demoCredentials}</p>
             <p className="text-xs text-blue-600">{t.adminLogin}</p>
             <p className="text-xs text-blue-600">{t.studentLogin}</p>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              {t.noAccount}{' '}
+              <button
+                type="button"
+                onClick={onSwitchToSignUp}
+                className="font-medium text-emerald-600 hover:text-emerald-500"
+              >
+                {t.signUpHere}
+              </button>
+            </p>
           </div>
         </form>
       </div>

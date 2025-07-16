@@ -48,6 +48,13 @@ export const userApi = {
       method: 'POST',
       body: JSON.stringify(credentials),
     }),
+  
+  // Sign up user
+  signUp: (userData: { name: string; email: string; password: string }) =>
+    apiRequest<{ success: boolean; user?: any; message?: string }>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    }),
 };
 
 // Message API functions

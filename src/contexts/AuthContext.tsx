@@ -5,6 +5,7 @@ import { userApi } from '../services/api';
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  signUp: (userData: { name: string; email: string; password: string }) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -52,6 +53,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return false;
   };
 
+  const signUp = async (userData: { name: string; email: string; password: string }): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      const response = await userApi.signUp(userData);
+      
+      if (response.success && response.user) {
+        setUser({
+          id: response.user.id.toString(),
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role || 'student',
+          enrolledCourses: response.user.role === 'student' ? [] : undefined
+        });
+        setIsLoading(false);
+        return true;
+      }
+    } catch (error) {
+      console.error('Sign up error:', error);
+    }
+    
+    setIsLoading(false);
+    return false;
+  };
+
   const logout = () => {
     setUser(null);
   };
@@ -59,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value = {
     user,
     login,
+    signUp,
     logout,
     isLoading
   };

@@ -23,6 +23,7 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
     role TEXT DEFAULT 'student',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
@@ -50,11 +51,11 @@ db.serialize(() => {
   )`);
 
   // Insert default admin user if not exists
-  db.run(`INSERT OR IGNORE INTO users (name, email, role) 
-          VALUES ('Admin User', 'admin@language.com', 'admin')`);
+  db.run(`INSERT OR IGNORE INTO users (name, email, password, role) 
+          VALUES ('Admin User', 'admin@language.com', 'admin123', 'admin')`);
   
-  db.run(`INSERT OR IGNORE INTO users (name, email, role) 
-          VALUES ('Ahmed Hassan', 'student@language.com', 'student')`);
+  db.run(`INSERT OR IGNORE INTO users (name, email, password, role) 
+          VALUES ('Ahmed Hassan', 'student@language.com', 'student123', 'student')`);
 });
 
 // API Routes
@@ -74,34 +75,71 @@ app.get('/api/users', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   
-  // Simple authentication (in production, use proper password hashing)
-  if (email === 'admin@language.com' && password === 'admin123') {
-    db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      if (row) {
-        res.json({ success: true, user: row });
-      } else {
-        res.status(401).json({ success: false, message: 'User not found' });
-      }
-    });
-  } else if (email === 'student@language.com' && password === 'student123') {
-    db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      if (row) {
-        res.json({ success: true, user: row });
-      } else {
-        res.status(401).json({ success: false, message: 'User not found' });
-      }
-    });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid credentials' });
+  if (!email || !password) {
+    res.status(400).json({ success: false, message: 'Email and password are required' });
+    return;
   }
+
+  db.get('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    if (row) {
+      res.json({ success: true, user: row });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+  });
+});
+
+// Sign up user
+app.post('/api/auth/signup', (req, res) => {
+  const { name, email, password } = req.body;
+  
+  if (!name || !email || !password) {
+    res.status(400).json({ success: false, message: 'Name, email, and password are required' });
+    return;
+  }
+
+  if (password.length < 6) {
+    res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    return;
+  }
+
+  // Check if user already exists
+  db.get('SELECT * FROM users WHERE email = ?', [email], (err, existingUser) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    
+    if (existingUser) {
+      res.status(400).json({ success: false, message: 'User with this email already exists' });
+      return;
+    }
+
+    // Create new user
+    db.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', 
+      [name, email, password, 'student'], 
+      function(err) {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        
+        // Return the created user
+        const newUser = {
+          id: this.lastID,
+          name,
+          email,
+          role: 'student'
+        };
+        
+        res.json({ success: true, user: newUser });
+      }
+    );
+  });
 });
 
 // Create new user
