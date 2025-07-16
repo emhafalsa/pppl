@@ -3,6 +3,7 @@ import { Search, Filter, Calendar, Users, Clock, Star, ChevronRight } from 'luci
 import { useLanguage } from '../../contexts/LanguageContext';
 import { mockCourses } from '../../data/mockData';
 import { Course } from '../../types';
+import { registrationApi } from '../../services/api';
 
 const CourseRegistration: React.FC = () => {
   const { language } = useLanguage();
@@ -133,10 +134,24 @@ const CourseRegistration: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      // Simulate form submission
-      setTimeout(() => {
+      
+      if (!selectedCourse) return;
+      
+      // Submit registration to backend
+      registrationApi.createRegistration({
+        user_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        course_id: selectedCourse.id,
+        course_title: selectedCourse.title,
+        experience: formData.experience,
+        goals: formData.goals
+      }).then(() => {
         setIsSubmitted(true);
-      }, 1000);
+      }).catch((error) => {
+        console.error('Registration error:', error);
+        // Handle error (you could add error state here)
+      });
     };
 
     if (!selectedCourse) return null;

@@ -6,10 +6,11 @@ import LoginForm from './components/Auth/LoginForm';
 import AdminDashboard from './components/Dashboard/AdminDashboard';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import CourseRegistration from './components/Courses/CourseRegistration';
+import ContactForm from './components/Contact/ContactForm';
 
 const AppContent: React.FC = () => {
   const { user } = useAuth();
-  const [currentView, setCurrentView] = React.useState<'dashboard' | 'courses' | 'attendance'>('dashboard');
+  const [currentView, setCurrentView] = React.useState<'dashboard' | 'courses' | 'contact'>('dashboard');
 
   if (!user) {
     return <LoginForm />;
@@ -39,6 +40,16 @@ const AppContent: React.FC = () => {
           >
             Courses
           </button>
+          <button
+            onClick={() => setCurrentView('contact')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              currentView === 'contact'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Contact
+          </button>
         </div>
       </div>
     </nav>
@@ -54,6 +65,7 @@ const AppContent: React.FC = () => {
           user.role === 'admin' ? <AdminDashboard /> : <StudentDashboard />
         )}
         {currentView === 'courses' && <CourseRegistration />}
+        {currentView === 'contact' && <ContactForm />}
       </main>
     </div>
   );
